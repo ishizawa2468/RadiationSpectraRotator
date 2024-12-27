@@ -4,4 +4,4 @@
 .DS_store
 
 # PyCharm
-.idea/
+.idea/*
