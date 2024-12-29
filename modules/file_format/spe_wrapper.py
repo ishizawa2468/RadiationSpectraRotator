@@ -11,19 +11,23 @@ class SpeWrapper(SpeReference):
         super().__init__(filepath)
         self._filepath = filepath
 
-    # 指定されたframeのimgデータをpd.DataFrameで返す
     def get_one_data_df(self,
                         rois:Optional[Sequence[int]] = None,
                         frame:Optional[int] = None) -> pd.DataFrame:
-        # NOTE: frameを指定しないと、shape=(1, 800, 512, 512)のように返ってくる。
-        # なんで4次元？
-        data_list = self.get_data(rois=rois, frames=[frame])[0][0]
+        data_list = self.get_data(rois=rois, frames=[frame])[0][0] # list, ndarrayを外すして、二次元の露光データを取得
         return pd.DataFrame(data_list)
+
+    # 指定されたframeのimgデータを返す
+    def get_frame_data(self,
+                       rois:Optional[Sequence[int]] = None,
+                       frame:Optional[int] = None) -> np.ndarray:
+        # NOTE: frameを指定しないと、shape=(1, 800, 512, 512)のように返ってくる。
+        # numpy.ndarrayのlistなので四次元 (List(ndarray))
+        return self.get_data(frames=frame)[0][0] # list, ndarrayを外すして、二次元の露光データを取得
 
     # (frame_num, pixel, pixel)の3次元のndarrayを返す
     def get_all_data_arr(self) -> np.ndarray:
-        data_list = self.get_data()[0]
-        return np.array(data_list)
+        return self.get_data()[0]
 
     # 最大値配列を返す
     def get_max_intensity(self):
