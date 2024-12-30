@@ -4,15 +4,20 @@
 
 """
 import functools
+from enum import Enum, StrEnum
 
 import numpy as np
+from scipy.ndimage import rotate
 
 from modules.file_format.spe_wrapper import SpeWrapper
 
 class RawSpectrumData:
-    """ ファイル形式によって分岐する """
-    file_extension: str # データのファイル拡張子。__init__処理で設定される
-    file_name: str # 元データがどのファイル由来なのかを覚えておく
+    """ 元データのファイル形式によって分岐する """
+    file_extension: str # ファイル拡張子
+    file_name: str # 由来のファイル名
+    position_pixel_num: int
+    wavelength_pixel_num: int
+    center_pixel: int
 
     def __init__(self, file_data):
         """ データファイルをpythonクラスでインスタンス化したものを受け取る。
@@ -33,6 +38,13 @@ class RawSpectrumData:
         else:
             raise ValueError("データ形式(拡張子)に対応していません。")
 
+    def get_frame_data(self, frame):
+        match self.file_extension:
+            case ".spe":
+                return self.spe.get_frame_data(frame=frame)
+            case _:
+                raise ValueError("データ形式(拡張子)に対応していません。")
+
     @functools.cache
     def get_data_shape(self) -> dict:
         """ 露光データの形(データ数)を返す
@@ -44,10 +56,15 @@ class RawSpectrumData:
                 frame_num = self.spe.num_frames
                 # NOTE: ↓ROIには対応できていないかも。ROI設定したこと無いのでわからない。
                 # TODO: 本当にheightがposでwidthがwlか確かめる。labのデータが違うpixel数を持ってたはず
-                image = self.spe.get_frame_data([])
-                position_pixel_num = image.shape[0] # 最初がposition
+                position_pixel_num = self.spe.roi_list[0].height # 加熱位置
                 center_pixel = round(position_pixel_num / 2) # 四捨五入でなく、round to evenなので注意
-                wavelength_pixel_num = image.shape[1]
+                wavelength_pixel_num = self.spe.roi_list[0].width
+
+                # set
+                self.position_pixel_num = position_pixel_num
+                self.wavelength_pixel_num = wavelength_pixel_num
+                self.center_pixel = center_pixel
+
                 return {
                     "frame_num": frame_num,
                     "position_pixel_num": position_pixel_num,
@@ -101,11 +118,12 @@ class RawSpectrumData:
             case _:
                 raise ValueError("データ形式(拡張子)に対応していません。")
 
-    def get_centers_arr_by_max(self):
+    def get_centers_arr_by_max(self, frame):
         """ frame?全体?のimshowにscatterする中心位置を得る
 
         :return:
         """
+        # TODO
         pass
 
     def get_centers_arr_by_skewfit(self):
@@ -113,4 +131,39 @@ class RawSpectrumData:
 
         :return:
         """
+        # TODO
         pass
+
+    def get_rotated_image(self, frame, rotate_deg, rotate_option):
+        option_enum = RotateOption.from_str(rotate_option)
+        image = self.get_frame_data(frame)
+        match option_enum:
+            case RotateOption.WHOLE:
+                return rotate(image, angle=rotate_deg, reshape=False)
+            case RotateOption.SEPARATE_HALF:
+                up_image = image[0:self.center_pixel, :]
+                down_image = image[self.center_pixel:self.position_pixel_num, :]
+
+                # 上下の画像をそれぞれ回転
+                print(up_image.shape, down_image.shape)
+                rotated_up = rotate(up_image, angle=rotate_deg, reshape=False)
+                rotated_down = rotate(down_image, angle=rotate_deg, reshape=False)
+
+                # 再結合
+                combined_image = np.vstack((rotated_up, rotated_down))
+                return combined_image
+            case _:
+                pass
+
+
+class RotateOption(StrEnum):
+    WHOLE = "whole"
+    SEPARATE_HALF = "separate_half"
+
+    @classmethod
+    def from_str(cls, option_str):
+        try:
+            return cls(option_str.lower())
+        except ValueError:
+            raise ValueError(f"回転オプションが不正です: {option_str}\n以下で指定してください: {', '.join(o.value for o in cls)}")
+

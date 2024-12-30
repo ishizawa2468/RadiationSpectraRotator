@@ -23,7 +23,7 @@ class SpeWrapper(SpeReference):
                        frame:Optional[int] = None) -> np.ndarray:
         # NOTE: frameを指定しないと、shape=(1, 800, 512, 512)のように返ってくる。
         # numpy.ndarrayのlistなので四次元 (List(ndarray))
-        return self.get_data(frames=frame)[0][0] # list, ndarrayを外すして、二次元の露光データを取得
+        return self.get_data(frames=[frame])[0][0] # list, ndarrayを外して、二次元の露光データを取得
 
     # (frame_num, pixel, pixel)の3次元のndarrayを返す
     def get_all_data_arr(self) -> np.ndarray:
