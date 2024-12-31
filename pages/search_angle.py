@@ -77,7 +77,7 @@ frame = st.slider(
     spe.num_frames,  # スライダーの最大値
 ) - 1 # GUIでは1始まりにして、処理では0始まりにしているため
 
-original_image = spe.get_one_data_df(frame=frame) # スライダーframeの露光データを取得
+original_image = spe.get_frame_data(frame=frame) # スライダーframeの露光データを取得
 
 # frameにおける露光データを描画
 fig, ax = plt.subplots(dpi=300)

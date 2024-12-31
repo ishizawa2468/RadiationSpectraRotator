@@ -1,21 +1,24 @@
 from typing import Optional, Sequence
 
 import numpy as np
-import pandas as pd
 
 from modules.file_format.read_spe import SpeReference
 
 # 自分で欲しい形式でデータを返してもらうためのラッパー
 class SpeWrapper(SpeReference):
+    # ref) SpeFile in T-rax
+    DATA_TYPE_DICT = {
+        0: np.float32,
+        1: np.int32,
+        2: np.int16,
+        3: np.uint16,
+        8: np.uint32
+    }
+    INITIAL_POSITION = 4100
+
     def __init__(self, filepath: str):
         super().__init__(filepath)
         self._filepath = filepath
-
-    def get_one_data_df(self,
-                        rois:Optional[Sequence[int]] = None,
-                        frame:Optional[int] = None) -> pd.DataFrame:
-        data_list = self.get_data(rois=rois, frames=[frame])[0][0] # list, ndarrayを外すして、二次元の露光データを取得
-        return pd.DataFrame(data_list)
 
     # 指定されたframeのimgデータを返す
     def get_frame_data(self,
@@ -35,17 +38,21 @@ class SpeWrapper(SpeReference):
 
     # SpeFileからの借用
     def _read_at(self, pos, size, ntype):
-        pos = int(pos)
-        size = int(size)
-        self._fid.seek(pos)
-        return np.fromfile(self._fid, ntype, size)
+        with open(self._filepath, 'rb') as fid:
+            pos = int(pos)
+            size = int(size)
+            fid.seek(pos)
+            return np.fromfile(fid, ntype, size)
+
+    def set_datatype(self):
+        self._data_type = self._read_at(108, 1, np.uint16)[0]
 
     def _get_xml_string(self):
         """Reads out the xml string from the file end"""
-        self._fid = open(self._filepath, 'rb')
         self.xml_offset = self._read_at(678, 1, np.int_)[0]
-        self._fid.seek(int(self.xml_offset))
-        self.xml_string = self._fid.read()
+        with open(self._filepath, 'rb') as fid:
+            fid.seek(int(self.xml_offset))
+            self.xml_string = fid.read()
 
     def get_params_from_xml(self):
         self._get_xml_string()
@@ -73,3 +80,5 @@ class SpeWrapper(SpeReference):
             if ('Name type' in ele) and ('/' not in ele):
                 # print(f"{i}: {ele = }")
                 self.OD = ele.split('>')[-1]
+
+

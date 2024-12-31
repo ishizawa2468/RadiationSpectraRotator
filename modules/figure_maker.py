@@ -47,7 +47,7 @@ class FigureMaker:
         return fig, ax
 
     @staticmethod
-    def get_histgram_fit_figure(file_name, histgram_fitter):
+    def get_histogram_fit_figure(file_name, histgram_fitter):
         plt.hist(histgram_fitter.data, bins=histgram_fitter.bins, density=True, alpha=0.6, color="g", label="Histogram")
         plt.plot(histgram_fitter.x_fit, histgram_fitter.y_fit, color="red", label="Fitted Gaussian")
         plt.xlabel("Intensity without heating")
@@ -77,3 +77,13 @@ class FigureMaker:
             linestyle='--'
         )
         plt.legend()
+
+    @staticmethod
+    def overlap_by_center_positions(ax, center_pixels, wavelength_pixels, color="red"):
+        ax.scatter(
+            center_pixels,
+            wavelength_pixels,
+            color=color,
+            s=5
+        )
+        return ax
