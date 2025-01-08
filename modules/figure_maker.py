@@ -23,13 +23,14 @@ class FigureMaker:
 
     @staticmethod
     def get_max_I_figure(file_name, all_max_I, up_max_I, down_max_I):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10,4))
         ax.plot(all_max_I, color='red', label='All')
         ax.plot(up_max_I, color='blue', linestyle="--", label='Up')
         ax.plot(down_max_I, color='green', linestyle="--", label='Down')
         ax.set_xlabel("Frame")
         ax.set_ylabel("Intensity")
-        ax.set_title(f"Max radiation intensity / {file_name}")
+        ax.set_title(f"Max intensity in each frame\n{file_name}")
+        ax.grid(linestyle='--')
         ax.legend()
         return fig, ax
 
@@ -42,7 +43,7 @@ class FigureMaker:
         # ラベル付け
         ax.set_xlabel("Wavelength (pixel)")
         ax.set_ylabel("Position (pixel)")
-        ax.set_title(f"Exposure / {file_name} / frame = {frame}")
+        ax.set_title(f"Image of  {file_name}\nFrame = {frame}")
         cbar.set_label("Intensity")
         return fig, ax
 
@@ -79,11 +80,18 @@ class FigureMaker:
         plt.legend()
 
     @staticmethod
-    def overlap_by_center_positions(ax, center_pixels, wavelength_pixels, color="red"):
+    def overlap_by_center_positions(ax, wavelength_pixels, center_pixels, color="red"):
         ax.scatter(
-            center_pixels,
             wavelength_pixels,
+            center_pixels,
             color=color,
-            s=5
+            s=2
+        )
+        ax.plot(
+            wavelength_pixels,
+            center_pixels,
+            color=color,
+            linewidth=1,
+            alpha=0.3
         )
         return ax

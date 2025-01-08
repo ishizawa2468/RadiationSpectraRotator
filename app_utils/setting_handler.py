@@ -4,7 +4,7 @@ import os
 import json
 
 # それぞれのページで共通レイアウト・設定を作る
-def common_setting():
+def set_common_setting():
     # 共通の設定
     st.set_page_config(
         page_title="SPE Rotater",
@@ -25,7 +25,7 @@ class Setting:
     PATH_TO_JSON = 'app_utils/spe_rotator_setting.json'
 
     def __init__(self):
-        self.json = self._get_setting()
+        self.setting_json = self._get_setting()
 
     # 設定jsonを読み込むメソッド
     def _get_setting(self) -> dict:
