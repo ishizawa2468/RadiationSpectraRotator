@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 """plot用の設定"""
 plt.rcParams['mathtext.fontset'] = 'cm'     #数式用のフォントejavuserif" or "cm"
@@ -40,6 +41,9 @@ class FigureMaker:
         im = ax.imshow(image, origin='upper', cmap='gist_gray', aspect='auto')
         # カラーバーを表示
         cbar = fig.colorbar(im, ax=ax)
+        # 最大強度のpositionに線を引く
+        max_position, _ = np.unravel_index(np.argmax(image), image.shape)
+        ax.axhline(max_position, color='red', linestyle='--', linewidth=0.5)
         # ラベル付け
         ax.set_xlabel("Wavelength (pixel)")
         ax.set_ylabel("Position (pixel)")

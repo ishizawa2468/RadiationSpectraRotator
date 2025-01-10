@@ -9,18 +9,16 @@ from scipy.ndimage import rotate
 import os
 from datetime import datetime
 
-import app_utils.setting_handler as util
+from app_utils import setting_handler
 from modules.file_format.spe_wrapper import SpeWrapper
 from modules.data_model.raw_spectrum_data import RawSpectrumData
 from modules.radiation_fitter import RadiationFitter
 from modules.figure_maker import FigureMaker
 
 # 共通の設定
-util.set_common_setting()
-# セッションに保存するもの（リロードでクリア、それ以外の画面操作で使い回される）
-
+setting_handler.set_common_setting()
 # まず設定インスタンスを作成しておく。これを通してフォルダパスを読み込んだり保存したりする
-setting = util.Setting()
+setting = setting_handler.Setting()
 
 st.title("📐Search angle")
 st.divider()
@@ -31,6 +29,9 @@ path_to_files = setting.setting_json['read_path'] # 別ページで設定した�
 # ファイルが得られるpathかどうか確認
 try:
     files = os.listdir(path_to_files)
+    if not any(file.endswith('.spe') and not file.startswith('.') for file in files):
+        st.write(f'有効なファイルが {path_to_files} にありません。')
+        st.stop()
 except Exception as e:
     st.subheader('Error: pathが正しく設定されていません。ファイルが存在するフォルダを指定してください。')
     st.subheader('現在の設定されているpath: {}'.format(path_to_files))
@@ -41,7 +42,7 @@ files.sort() # 見やすいようにソートしておく
 if st.checkbox('.spe拡張子のみを選択肢にする', value=True):
     filtered_files = [] # .speで終わるもののみを入れるリスト
     for file in files:
-        if file.endswith('.spe'):
+        if file.endswith('.spe') and not file.startswith('.'):
             filtered_files.append(file)
     # 一通り終わったら、filesを置き換える
     files = filtered_files
@@ -79,24 +80,27 @@ else:
 st.divider()
 
 st.subheader("2. Frameを選択")
-# 最大強度の時間配列を取得する
-all_max_I = original_radiation.get_max_intensity_arr()
-up_max_I, down_max_I = original_radiation.get_separated_max_intensity_arr()
-# 図を作る
-fig, ax = FigureMaker.get_max_I_figure(
-    file_name,
-    all_max_I,
-    up_max_I,
-    down_max_I
-)
-st.pyplot(fig)
-
-# スライダーでframeを選択できるようにする
-frame = st.slider(
-    "Frame数",
-    0,  # スライダーの最小値
-    spe.num_frames - 1,  # スライダーの最大値
-)
+if spe.num_frames == 1:
+    frame = 0
+    st.write('1 frameのみなのでskip')
+else:
+    # スライダーでframeを選択できるようにする
+    frame = st.slider(
+        "Frame数",
+        0,  # スライダーの最小値
+        spe.num_frames - 1,  # スライダーの最大値
+    )
+    # 最大強度の時間配列を取得する
+    all_max_I = original_radiation.get_max_intensity_arr()
+    up_max_I, down_max_I = original_radiation.get_separated_max_intensity_arr()
+    # 図を作る
+    fig, ax = FigureMaker.get_max_I_figure(
+        file_name,
+        all_max_I,
+        up_max_I,
+        down_max_I
+    )
+    st.pyplot(fig)
 
 original_image = spe.get_frame_data(frame=frame) # スライダーframeの露光データを取得
 
