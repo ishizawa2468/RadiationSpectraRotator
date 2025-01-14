@@ -34,7 +34,7 @@ class FileHander:
         for file in files:
             new_file_name = "_".join(
                 [
-                    file,
+                    file[:-4], # 拡張子を取り除く
                     rotate_option,
                     get_rotate_deg_str(rotate_deg)
                 ]
