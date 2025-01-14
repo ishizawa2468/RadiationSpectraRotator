@@ -143,24 +143,41 @@ if conduct_rotation:
         st.write(f'{selected_file} -> {new_files_with_ext[i]}')
         print(f"{path_to_original_file}\n -> {path_to_save_file}") # log
 
-        # コピー処理
+        # コピー処理j
         st.write(f'複製中...')
         print('コピー開始') # log
-        shutil.copyfile(
-            src=path_to_original_file,
-            dst=path_to_save_file
-        )
+        is_skipped = False
+        if not os.path.exists(path_to_save_file):
+            shutil.copyfile(
+                src=path_to_original_file,
+                dst=path_to_save_file
+            )
+        else:
+            if is_overwrite:
+                st.write(f'{path_to_save_file} を上書きします。')
+                shutil.copyfile(
+                    src=path_to_original_file,
+                    dst=path_to_save_file
+                )
+            else:
+                st.write(f'{path_to_save_file} は存在します。上書きしない設定なのでskip')
+                is_skipped = True
+
+
         print('コピー終了') # log
 
         # 回転処理
         st.write(f'回転中...')
-        print('回転開始') # log
-        RawSpectrumData.overwrite_spe_image(
-            before_spe_path=path_to_original_file,
-            after_spe_path=path_to_save_file,
-            rotate_deg=rotate_deg,
-            rotate_option=rotate_option
-        )
-        st.write('回転終了')
-        print('回転終了') # log
+        if is_skipped:
+            pass
+        else:
+            print('回転開始')  # log
+            RawSpectrumData.overwrite_spe_image(
+                before_spe_path=path_to_original_file,
+                after_spe_path=path_to_save_file,
+                rotate_deg=rotate_deg,
+                rotate_option=rotate_option
+            )
+            print('回転終了') # log
+            st.write('回転終了')
     st.subheader('すべて完了!')
