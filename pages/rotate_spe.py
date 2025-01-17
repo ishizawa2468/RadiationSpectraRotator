@@ -86,7 +86,7 @@ if will_set_zero_with_saturation:
         "飽和したと判断するしきい値 (これ以上の値があるframeを0にする)",
         min_value=60_000,
         max_value=65_535,
-        value=65_000,
+        value=65_200,
         step=1
     )
 else:
@@ -164,7 +164,7 @@ if conduct_rotation:
                 is_skipped = True
 
 
-        print('コピー終了') # log
+        print(f"\nコピー終了") # log
 
         # 回転処理
         st.write(f'回転中...')
