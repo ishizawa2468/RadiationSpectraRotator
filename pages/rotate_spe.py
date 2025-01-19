@@ -180,4 +180,4 @@ if conduct_rotation:
             )
             print('回転終了') # log
             st.write('回転終了')
-    st.subheader('すべて完了!')
+    st.success('すべて完了!')
