@@ -2,6 +2,8 @@ import streamlit as st
 
 import app_utils.setting_handler as setting_handler
 
+from log_util import logger
+
 # サイドバーを隠す処理
 def hide_sidebar():
     # 初回実行を判定するためのフラグを session_state に用意
@@ -17,7 +19,7 @@ def hide_sidebar():
 hide_sidebar()
 setting_handler.set_common_setting()
 
-print('log: Homeを表示')
+logger.info('Homeを表示')
 
 # 共通の表示
 st.title("Welcome to SPE Rotator!")

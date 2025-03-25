@@ -1,6 +1,9 @@
 # pycache
 **/__pycache__/**
 
+# log
+app.log
+
 # Mac
 .DS_store
 
