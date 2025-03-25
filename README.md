@@ -1,9 +1,11 @@
-# 概要
+# Radiation Spectra Rotator
+
+## 概要
 
 温度露光データ(.spe)を回転補正するアプリです。
 
 
-# 起動方法
+## 起動方法
 
 - AppManagerから起動する
     - AppManagerと同じ階層にcloneしてください
@@ -14,7 +16,7 @@
     - `streamlit run home.py`
 
 
-# デモ
+## デモ
 
 一時停止などしたい場合はdocsにあるdemo.mp4をダウンロードしてください。
 
