@@ -9,10 +9,10 @@
 
 - AppManagerから起動する
     - AppManagerと同じ階層にcloneしてください
-    - 起動方法は〜で確認してください
+    - 起動方法は[AppManager](https://github.com/ishizawa2468/AppManagerForStreamlit?tab=readme-ov-file#%E6%A6%82%E8%A6%81)で確認してください
 - ターミナルから起動する場合
     - どちらかのコマンドを実行してください
-    - `python main.py`
+    - ```python main.py```
     - `streamlit run home.py`
 
 

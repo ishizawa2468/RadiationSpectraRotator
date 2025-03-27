@@ -28,7 +28,7 @@ st.markdown(
     ### 【概要】
     - 露光データを持った`.spe`ファイルを複製して、露光データを回転させます。
         - 説明・使い方はこちら → [README](https://github.com/ishizawa2468/RadiationSpectraRotator?tab=readme-ov-file#radiation-spectra-rotator)
-    - 以下のようにページが分かれています。←から選択してください。
+    - 以下のようにページが分かれています。サイドバーから選択してください。
         1. **(必須)** Set folder: `.spe`があるフォルダを選ぶページ
         2. Search angle: 適切な回転角度を調べるページ
         3. Rotate SPE: 回転させるページ
