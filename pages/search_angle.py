@@ -154,7 +154,7 @@ def display_frame_selector(spe, original_radiation, file_name):
 
 
 # --------------------------------------------------------------------------------
-# ここから「回転・fitting」パートのメソッド分割
+# ここから「回転・(最大値表示とfitting)」パートのメソッド分割
 # --------------------------------------------------------------------------------
 
 def display_rotation_ui():
@@ -163,18 +163,17 @@ def display_rotation_ui():
     """
     st.divider()
     st.subheader("3. 回転角度を試す")
-    st.write("ファイル、frameは上で調節してください。")
-    st.write("※元ファイルは変更されません。")
+    st.info("ファイル、frameは上で調節してください。 ※元ファイルは変更されません。")
 
     rotate_deg = st.slider(
-        "回転角度 (0.05°刻み、-2.0〜2.0まで)",
+        "a. 回転角度 (0.05°刻み、-2.0〜2.0まで)",
         min_value=-2.0,
         max_value=2.0,
         value=0.0,
         step=0.05
     )
     rotate_option = st.selectbox(
-        label='回転中心を選択',
+        label='b. 回転中心を選択',
         options=['whole', 'separate_half']
     )
     logger.info(f"選択された回転条件: rotate_deg={rotate_deg}, rotate_option={rotate_option}")
@@ -200,7 +199,7 @@ def display_threshold_slider(all_max_I):
     閾値スライダーを表示し、ユーザーが選択した値を返す。
     """
     threshold = st.slider(
-        "中心位置を調べる際の、スペクトルの最大強度の下限",
+        "c. 中心位置を調べる際の、スペクトルの最大強度の下限",
         min_value=0,
         max_value=int(round(all_max_I.max())),
     )
@@ -208,12 +207,25 @@ def display_threshold_slider(all_max_I):
     return threshold
 
 
-def display_max_pixel_positions(rotated_image, file_name, frame, original_image, fitted_positions, rotate_deg):
+def display_max_pixel_positions(
+        file_name,
+        original_image, rotated_image,
+        frame, rotate_deg, threshold,
+        fitted_positions
+):
     """
     最大値ピクセルをオーバーレイした図を作成して表示する。
     """
     st.divider()
     st.subheader("最大値波長ピクセルを表示")
+
+    # 設定値を表示する
+    st.write({
+        "ファイル名": file_name,
+        "Frame": frame,
+        "回転角度": rotate_deg,
+        "強度しきい値": threshold
+    })
 
     max_wavelength_pixels = np.argmax(rotated_image, axis=1)
 
@@ -232,7 +244,14 @@ def display_max_pixel_positions(rotated_image, file_name, frame, original_image,
     logger.debug("最大値ピクセルを重ね書きした図を表示完了")
 
 
-def fitting_and_display_center(rotated_image, file_name, frame, original_image, fitted_positions, rotate_deg):
+def fitting_and_display_center(
+        rotated_image,
+        file_name,
+        frame,
+        original_image,
+        fitted_positions,
+        rotate_deg
+):
     """
     fitted_positions に対して非対称ガウスでフィッティングを行い、
     中心ピクセルを図上にオーバーレイして可視化する。
@@ -270,34 +289,41 @@ def fitting_and_display_center(rotated_image, file_name, frame, original_image, 
     ax.set_title(f"Fitted center by skew gaussian\nRotated = {rotate_deg} deg / Frame = {frame}")
     st.pyplot(fig)
     logger.debug("fitting中心を重ね書きした図の表示完了")
+    st.success("表示完了")
 
 
-def display_rotation_experiment(frame, original_radiation, original_image, file_name):
+def display_rotated_image(frame, original_radiation, original_image, file_name):
     """
-    回転角度の試行、最大値ピクセル表示、fitting処理などを呼び出し、
-    まとめて実行するハイレベル関数。
+    回転角度の試行、最大値ピクセル表示、そして「ボタン押下でfitting実行」のフローをまとめる。
     """
+    # --- Step 1: 回転パラメータ入力と画像の回転 ---
     rotate_deg, rotate_option = display_rotation_ui()
     rotated_image = rotate_image(original_radiation, frame, rotate_deg, rotate_option)
 
-    # 閾値スライダー → fitting対象行の抽出
+    # --- Step 2: 閾値設定 → fitting対象行の抽出 ---
     all_max_I = original_radiation.get_max_intensity_arr()
     threshold = display_threshold_slider(all_max_I)
     are_fitted_positions = rotated_image.max(axis=1) > threshold
     fitted_positions = np.where(are_fitted_positions)[0]
     logger.debug(f"Fitting対象の行数: {len(fitted_positions)}")
 
-    # 最大値ピクセル位置の可視化
-    display_max_pixel_positions(rotated_image, file_name, frame, original_image, fitted_positions, rotate_deg)
+    # --- Step 3: 最大値ピクセル位置の可視化 ---
+    display_max_pixel_positions(file_name, original_image, rotated_image, frame, rotate_deg, threshold, fitted_positions)
 
-    # fitting & 中心波長の可視化
-    fitting_and_display_center(rotated_image, file_name, frame, original_image, fitted_positions, rotate_deg)
+    # --- Step 4: 「fittingを実行」ボタン ---
+    # 押されたときだけFitting処理を実施
+    st.divider()
+    st.subheader("ひずみガウス関数で滑らかな中心位置を表示")
+    if st.button("Fittingを実行"):
+        st.success("Fittingを開始しました")
+        fitting_and_display_center(rotated_image, file_name, frame, original_image, fitted_positions, rotate_deg)
+    else:
+        st.info("ボタンを押すとfittingを開始します。")
 
 
 # --------------------------------------------------------------------------------
 # メイン処理
 # --------------------------------------------------------------------------------
-
 # 1. 共通設定
 configure_common_settings()
 
@@ -318,6 +344,5 @@ spe, original_radiation = create_spe_object(path_to_files, file_name)
 # 6. Frame 選択
 frame, original_image = display_frame_selector(spe, original_radiation, file_name)
 
-# 7. 回転角度やfitting実験
-display_rotation_experiment(frame, original_radiation, original_image, file_name)
-
+# 7. 回転角度 (最大値ピクセル描画 & fitting実行ボタン)
+display_rotated_image(frame, original_radiation, original_image, file_name)
