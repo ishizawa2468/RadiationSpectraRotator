@@ -96,7 +96,14 @@ def display_save_path_setting(setting):
     )
 
     if st.button('保存先を更新', type='primary'):
+        # 保存先パスの存在確認
+        if not os.path.isdir(save_path):
+            st.error(f"このパスはフォルダとして有効ではありません: {save_path}")
+            logger.error(f"このパスはフォルダとして有効ではありません: {save_path}")
+            st.stop()
+        # 有効なので保存
         setting.update_save_spe_path(save_path)
+        st.success('')
         logger.info(f'保存先を更新: {save_path}')
 
 

@@ -32,6 +32,7 @@ def display_title():
     """
     st.title("📐Search angle")
     logger.info("Search angle画面のロード開始")
+    st.info("このページではファイルの変更・作成は行いません", icon='💡')
     st.divider()
 
 
@@ -220,6 +221,7 @@ def display_max_pixel_positions(
     st.subheader("最大値波長ピクセルを表示")
 
     # 設定値を表示する
+    st.info("ここまでの設定値 -- 保存されないのでメモしてください")
     st.write({
         "ファイル名": file_name,
         "Frame": frame,
@@ -273,6 +275,7 @@ def fitting_and_display_center(
         except Exception as e:
             logger.error(f"Fittingに失敗: position={position}, error={repr(e)}")
             st.subheader(f"Fittingに失敗しました。\n{repr(e)}")
+            st.info("しきい値を上げることでFittingがうまく行きやすくなります。", icon="💡")
             st.stop()
 
     elapsed = time.time() - fitting_start
