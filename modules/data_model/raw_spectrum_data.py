@@ -7,8 +7,6 @@ import functools
 from enum import StrEnum
 
 import numpy as np
-from matplotlib import pyplot as plt
-from tqdm import tqdm
 from scipy.ndimage import rotate
 
 from modules.file_format.spe_wrapper import SpeWrapper
@@ -197,7 +195,7 @@ class RawSpectrumData:
             image_type = before_spe.DATA_TYPE_DICT[before_spe._data_type]
             image_size = before_radiation.position_pixel_num * before_radiation.wavelength_pixel_num
 
-            for frame in tqdm(range(before_radiation.frame_num)):
+            for frame in range(before_radiation.frame_num): # NOTE: tqdm, stqdmはAppManagerからの起動では使えない。std出力先が無いため？
                 spe_file.seek(position) # 書き込み場所に行く
                 rotated_image = before_radiation.get_rotated_image(frame, rotate_deg, rotate_option)
                 # 次元数を取得して、1次元データに変換する

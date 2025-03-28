@@ -1,7 +1,6 @@
 import os
 import shutil
 import streamlit as st
-from stqdm import stqdm
 
 from app_utils import setting_handler
 from app_utils.file_handler import FileHander
@@ -256,7 +255,7 @@ def execute_rotation(
 
     logger.info(f"回転処理を開始: ファイル数={len(selected_files)}")
 
-    for i, selected_file in stqdm(enumerate(selected_files), total=len(selected_files)):
+    for i, selected_file in enumerate(selected_files): # NOTE: tqdm, stqdmはAppManagerからの起動では使えない。std出力先が無いため？
         path_to_original_file = os.path.join(path_to_original_files, selected_file)
         path_to_save_file = os.path.join(path_to_save_files, new_files_with_ext[i])
 
@@ -280,7 +279,7 @@ def execute_rotation(
             )
             st.write('回転終了')
         else:
-            st.write('上書きしない設定のため、回転をスキップしました。')
+            st.warning('上書きしない設定のため、回転をスキップしました。', icon='⚠️')
 
     st.success('すべて完了!')
     logger.info('回転処理が正常に完了')

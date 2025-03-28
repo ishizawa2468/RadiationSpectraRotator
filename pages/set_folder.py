@@ -60,6 +60,7 @@ def get_spe_files(setting: setting_handler.Setting):
         return filtered_files, path_to_files
 
     except Exception:
+        # FIXME このエラー表示はst.errorを使う
         st.subheader('Error: pathが正しく設定されていません。ファイルが存在するフォルダを指定してください。')
         st.subheader(f'現在の設定されているpath: {path_to_files}')
         logger.info('存在しないパスが設定された')
@@ -103,7 +104,7 @@ def display_save_path_setting(setting):
             st.stop()
         # 有効なので保存
         setting.update_save_spe_path(save_path)
-        st.success('')
+        st.success(f'保存先が更新されました: {save_path}')
         logger.info(f'保存先を更新: {save_path}')
 
 
