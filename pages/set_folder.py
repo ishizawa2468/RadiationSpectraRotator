@@ -11,7 +11,7 @@ def display_read_path_setting(setting: setting_handler.Setting):
     読み込みフォルダ設定の入力画面を表示し、ユーザー操作を受け付ける。
     """
     st.title("📂Set folder")
-    logger.info('Set Folder画面')
+    logger.info('Set Folder画面のロード開始')
 
     st.divider()
 

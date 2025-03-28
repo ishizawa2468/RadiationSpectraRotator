@@ -1,14 +1,12 @@
-import os
-import shutil
-
-import pandas as pd
 import streamlit as st
 from tqdm import tqdm
+import os
+import shutil
 
 from app_utils import setting_handler
 from app_utils.file_handler import FileHander
 from modules.data_model.raw_spectrum_data import RawSpectrumData
-from modules.file_format.spe_wrapper import SpeWrapper
+from log_util import logger
 
 # 共通の設定
 setting_handler.set_common_setting()
@@ -17,6 +15,7 @@ setting_handler.set_common_setting()
 setting = setting_handler.Setting()
 
 st.title("Rotate SPE")
+logger.info('Rotate SPE画面のロード開始')
 
 file_ext = '.spe'
 
